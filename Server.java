@@ -5,6 +5,7 @@ package com.javarush.task.task30.task3008;
  *    В последнем вызвал метод main
  * 2. Реализлвал класс ConsoleHelper.
  * 3. Добавил значения в enum MessageType.
+ * 4. Реализовал класс Message
  */
 
 // основной класс сервера
