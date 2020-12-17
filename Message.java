@@ -2,7 +2,6 @@ package com.javarush.task.task30.task3008;
 
 import java.io.Serializable;
 
-
 // класс, отвечающий за пересылаемые сообщения
 public class Message implements Serializable {
     private final MessageType type;
