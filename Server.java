@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - поле connectionMap, где ключом будет имя клиента, а значением - соединение с ним
  * - метод sendBroadcastMessage, который должен отправлять сообщение всем соединениям из connectionMap
  * 8. В классе Handler:
- * - создал и реализовал String serverHandshake(Connection connection)
+ * - создал и реализовал String serverHandshake(Connection connection), это этап рукопожатия (знакомства сервера с клиентом)
  * Метод в качестве параметра принимает соединение connection, а возвращает имя нового клиента.
  * 9. В классе Handler:
  * - создал и реализовал notifyUsers(Connection connection, String userName)
@@ -46,8 +47,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * 10. В классе Handler:
  * - создал и реализовал serverMainLoop(Connection connection, String userName)
  * Метод проверяет тип сообщения и отправляет отформатированное сообщение всем участникам чата
- * 11.
- *
+ * 11. В классе Handler:
+ * - реализовал метод run()
  */
 
 
@@ -108,7 +109,7 @@ public class Server {
 
         // отправляет новому участнику информации об остальных клиентах (участниках) чата
         private void notifyUsers(Connection connection, String userName) throws IOException {
-            for (String name: connectionMap.keySet()) {
+            for (String name : connectionMap.keySet()) {
                 if (!userName.equals(name)) {
                     connection.send(new Message(MessageType.USER_ADDED, name));
                 }
@@ -118,14 +119,43 @@ public class Server {
         // проверяет тип сообщения и отправляет отформатированное сообщение всем участникам чата
         private void serverMainLoop(Connection connection, String userName) throws IOException, ClassNotFoundException {
             while (true) {
-                // получаем сообщение
                 Message message = connection.receive();
                 if (message.getType() == MessageType.TEXT) {
-                    // отправляем сообщение всем участникам чата
                     sendBroadcastMessage(new Message(MessageType.TEXT, userName + ": " + message.getData()));
                 } else {
                     ConsoleHelper.writeMessage("Ошибка! Сообщение не является текстом");
                 }
+            }
+        }
+
+        @Override
+        public void run() {
+            ConsoleHelper.writeMessage("Установлено новое соединение с удаленным адресом " + socket.getRemoteSocketAddress());
+
+            try (Connection connection = new Connection(socket)) {
+
+                // получаем имя пользователя
+                String userName = serverHandshake(connection);
+
+                // рассылаем всем участникам чата информацию об имени присоединившегося участника
+                sendBroadcastMessage(new Message(MessageType.USER_ADDED, userName));
+
+                // сообщаем новому участнику о существующих участниках чата
+                notifyUsers(connection, userName);
+
+                // запускаем главный цикл обработки сообщений сервером
+                serverMainLoop(connection, userName);
+
+                // если метод serverHandshake() отработал и возвратил нам имя
+                if (userName != null) {
+                    // удаляем запись для этого имени из connectionMap
+                    connectionMap.remove(userName);
+                    // и рассылаем всем остальным участникам сообщение
+                    sendBroadcastMessage(new Message(MessageType.USER_REMOVED, userName));
+                }
+                ConsoleHelper.writeMessage("Соединение с удаленным адресом закрыто");
+            } catch (IOException | ClassNotFoundException e) {
+                ConsoleHelper.writeMessage("Произошла ошибка при обмене данными с удаленным адресом");
             }
         }
     }
