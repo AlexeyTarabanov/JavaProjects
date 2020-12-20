@@ -1,6 +1,11 @@
 package com.javarush.task.task30.task3008.client;
 
 import com.javarush.task.task30.task3008.Connection;
+import com.javarush.task.task30.task3008.ConsoleHelper;
+import com.javarush.task.task30.task3008.Message;
+import com.javarush.task.task30.task3008.MessageType;
+
+import java.io.IOException;
 
 /**
  * - Клиент, в начале своей работы, должен запросить у пользователя адрес и порт сервера,
@@ -18,6 +23,45 @@ public class Client {
     protected Connection connection;
     // volatile позволит гарантировать что каждый поток, использующий поле clientConnected, работает с актуальным, а не кэшированным его значением
     private volatile boolean clientConnected = false;
+
+    // зпрашивает ввод адреса сервера у пользователя и возвращает введенное значение
+    protected String getServerAddress() {
+        return ConsoleHelper.readString();
+    }
+
+    // запрашивает ввод порта сервера и возвращает его.
+    protected int getServerPort() {
+        return ConsoleHelper.readInt();
+    }
+
+    // запрашивает и возвращает имя пользователя
+    protected String getUserName() {
+        return ConsoleHelper.readString();
+    }
+
+    // проверяем отправлен ли текст из консоли
+    // в данной реализации клиента всегда должен возвращать true (мы всегда отправляем текст введенный в консоль).
+    // Этот метод может быть переопределен, если мы будем писать какой-нибудь другой клиент, унаследованный от нашего,
+    // который не должен отправлять введенный в консоль текст.
+    protected boolean shouldSendTextFromConsole() {
+        return true;
+    }
+
+    // создает и возвращает новый объект класса SocketThread
+    protected SocketThread getSocketThread() {
+        return new SocketThread();
+    }
+
+    // создает новое текстовое сообщение, используя переданный текст и отправляет его серверу
+    protected void sendTextMessage(String text) {
+        try {
+            connection.send(new Message(MessageType.TEXT, text));
+        } catch (IOException e) {
+            ConsoleHelper.writeMessage("Вы ввели некорректное значение");
+            clientConnected = false;
+        }
+    }
+
 
     public class SocketThread extends Thread {}
 }
