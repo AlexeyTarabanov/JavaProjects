@@ -3,8 +3,6 @@ package com.javarush.task.task30.task3008;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,6 +47,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * Метод проверяет тип сообщения и отправляет отформатированное сообщение всем участникам чата
  * 11. В классе Handler:
  * - реализовал метод run()
+ * 12. Создал пакет client, где будут храниться все классы, отвечающие за реализацию клиентов
+ * - в пакете, создал класс Client
+ *   в классе Client:
+ * - создал класс SocketThread унаследовал его от Thread
+ * Он будет отвечать за поток, устанавливающий сокетное соединение и читающий сообщения сервера.
+ * - создал поле типа Connection
+ * - добавил поле boolean clientConnected, сразу проинициализировал его значением false
+ * если клиент подсоединен к серверу поле вернет значение true, в противном случае false
+ * 13.
+ *
  */
 
 
@@ -83,6 +91,7 @@ public class Server {
         }
     }
 
+    // реализовывает протокол общения с клиентом
     private static class Handler extends Thread {
 
         private Socket socket;
@@ -133,24 +142,13 @@ public class Server {
             ConsoleHelper.writeMessage("Установлено новое соединение с удаленным адресом " + socket.getRemoteSocketAddress());
 
             try (Connection connection = new Connection(socket)) {
-
-                // получаем имя пользователя
                 String userName = serverHandshake(connection);
-
-                // рассылаем всем участникам чата информацию об имени присоединившегося участника
                 sendBroadcastMessage(new Message(MessageType.USER_ADDED, userName));
-
-                // сообщаем новому участнику о существующих участниках чата
                 notifyUsers(connection, userName);
-
-                // запускаем главный цикл обработки сообщений сервером
                 serverMainLoop(connection, userName);
 
-                // если метод serverHandshake() отработал и возвратил нам имя
                 if (userName != null) {
-                    // удаляем запись для этого имени из connectionMap
                     connectionMap.remove(userName);
-                    // и рассылаем всем остальным участникам сообщение
                     sendBroadcastMessage(new Message(MessageType.USER_REMOVED, userName));
                 }
                 ConsoleHelper.writeMessage("Соединение с удаленным адресом закрыто");
