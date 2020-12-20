@@ -9,34 +9,37 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 1. Создал классы ConsoleHelper, Connection, Message, MessageType, Server.
- *    - в последнем вызвал метод main
+ * - в последнем вызвал метод main
  * 2. В класс ConsoleHelper добавил:
- *    - поле reader и сразу инициализировал его
- *    - метод writeMessage(String message), который выводит сообщение message в консоль.
- *      реализовал его.
- *    - методы int readInt() / String readString(), которые возвращают число / строку, считанные с консоли
+ * - поле reader и сразу инициализировал его
+ * - метод writeMessage(String message), который выводит сообщение message в консоль.
+ * реализовал его.
+ * - методы int readInt() / String readString(), которые возвращают число / строку, считанные с консоли
  * 3. Добавил значения в enum MessageType.
  * 4. В класс Message добавил:
- *    - добавил поддержку Serializable
- *    - поля MessageType type, String data, геттеры для них и контструкторы.
+ * - поддержку Serializable
+ * - поля MessageType type, String data, геттеры для них и контструкторы.
  * 5. В класс Connection добавил:
- *    - поля Socket socket, ObjectOutputStream out, ObjectInputStream in и конструктор
- *    - метод send(Message message), который будет отправлять сообщения (сериализовать)
- *    - метод receive(), который читает сообщение (десериализовывает)
- *    - метод SocketAddress getRemoteSocketAddress(), который возвращает удаленный адрес сокетного соединения
- *    - метод close(), который закрывает все ресурсы класса
+ * - поля Socket socket, ObjectOutputStream out, ObjectInputStream in и конструктор
+ * - метод send(Message message), который будет отправлять сообщения (сериализовать)
+ * - метод receive(), который читает сообщение (десериализовывает)
+ * - метод SocketAddress getRemoteSocketAddress(), который возвращает удаленный адрес сокетного соединения
+ * - метод close(), который закрывает все ресурсы класса
  * 6. В класс Server добавил:
- *    - статический вложенный класс Handler, унаследовал его от Thread
- *      В класс Handler добавил:
- *        - поле Socket socket и конструктор
- *    в методе main:
- *    - считываю с клавиатуры порт сервера
- *    - создал серверный сокет на основе полученного порта
- *    - слушаем и принимаем входящие сокетные соединения
- *    - создаю и сразу запускаю новый поток Handler
+ * - статический вложенный класс Handler, унаследовал его от Thread
+ * В класс Handler добавил:
+ * - поле Socket socket и конструктор
+ * в методе main:
+ * - считываю с клавиатуры порт сервера
+ * - создал серверный сокет на основе полученного порта
+ * - слушаем и принимаем входящие сокетные соединения
+ * - создаю и сразу запускаю новый поток Handler
  * 7. В класс Server добавил:
- *    - поле connectionMap, где ключом будет имя клиента, а значением - соединение с ним
- *    - метод sendBroadcastMessage, который должен отправлять сообщение всем соединениям из connectionMap
+ * - поле connectionMap, где ключом будет имя клиента, а значением - соединение с ним
+ * - метод sendBroadcastMessage, который должен отправлять сообщение всем соединениям из connectionMap
+ * 8. В классе
+ * - создал и реализовал String serverHandshake(Connection connection)
+ * Метод в качестве параметра принимает соединение connection, а возвращает имя нового клиента.
  */
 
 
@@ -70,12 +73,38 @@ public class Server {
         }
     }
 
+    // реализовывает протокол общения с клиентом
     private static class Handler extends Thread {
 
         private Socket socket;
 
         public Handler(Socket socket) {
             this.socket = socket;
+        }
+
+        // метод возвращает имя клиента
+        private String serverHandshake(Connection connection) throws IOException, ClassNotFoundException {
+
+            // отправляем команду запрос имени пользователя
+            connection.send(new Message(MessageType.NAME_REQUEST, "Введите имя пользователя"));
+            // получаем сообщение от пользователя
+            Message answer = connection.receive();
+
+            // делаем три проверки
+            // - если в пришедшем сообщении не USER_NAME
+            // - если в ответ пришло пустое имя
+            // - или наша мапа уже содержит такое значение
+            if (answer.getType() != MessageType.USER_NAME || answer.getData().isEmpty()
+                    || connectionMap.containsKey(answer.getData()))
+                return serverHandshake(connection);
+
+            // после успешного проведения всех проверок добавляем в connectionMap новую пару
+            connectionMap.put(answer.getData(), connection);
+            // отправляем сообщение о том, что имя было принято
+            connection.send(new Message(MessageType.NAME_ACCEPTED, "Имя принято"));
+
+            // возвращаем имя клиента с которым было установлено соединение
+            return answer.getData();
         }
     }
 }
