@@ -43,7 +43,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * 9. В классе Handler:
  * - создал и реализовал notifyUsers(Connection connection, String userName)
  * Метод будет отправлять клиенту (новому участнику) информации об остальных клиентах (участниках) чата
- * 10.
+ * 10. В классе Handler:
+ * - создал и реализовал serverMainLoop(Connection connection, String userName)
+ * Метод проверяет тип сообщения и отправляет отформатированное сообщение всем участникам чата
+ * 11.
+ *
  */
 
 
@@ -52,6 +56,7 @@ public class Server {
 
     private static Map<String, Connection> connectionMap = new ConcurrentHashMap<>();
 
+    // отправляет сообщение всем участникам чата
     public static void sendBroadcastMessage(Message message) {
         try {
             for (Connection connection : connectionMap.values()) {
@@ -85,7 +90,7 @@ public class Server {
             this.socket = socket;
         }
 
-        // метод возвращает имя клиента
+        // возвращает имя клиента
         private String serverHandshake(Connection connection) throws IOException, ClassNotFoundException {
 
             connection.send(new Message(MessageType.NAME_REQUEST, "Введите имя пользователя"));
@@ -101,14 +106,25 @@ public class Server {
             return answer.getData();
         }
 
-        // метод отправляет новому участнику информации об остальных клиентах (участниках) чата
+        // отправляет новому участнику информации об остальных клиентах (участниках) чата
         private void notifyUsers(Connection connection, String userName) throws IOException {
-            // перебираем список ключей
             for (String name: connectionMap.keySet()) {
-                // если имя уникально
                 if (!userName.equals(name)) {
-                    // отправляем сообщение с этим именем
                     connection.send(new Message(MessageType.USER_ADDED, name));
+                }
+            }
+        }
+
+        // проверяет тип сообщения и отправляет отформатированное сообщение всем участникам чата
+        private void serverMainLoop(Connection connection, String userName) throws IOException, ClassNotFoundException {
+            while (true) {
+                // получаем сообщение
+                Message message = connection.receive();
+                if (message.getType() == MessageType.TEXT) {
+                    // отправляем сообщение всем участникам чата
+                    sendBroadcastMessage(new Message(MessageType.TEXT, userName + ": " + message.getData()));
+                } else {
+                    ConsoleHelper.writeMessage("Ошибка! Сообщение не является текстом");
                 }
             }
         }
