@@ -37,9 +37,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * 7. В класс Server добавил:
  * - поле connectionMap, где ключом будет имя клиента, а значением - соединение с ним
  * - метод sendBroadcastMessage, который должен отправлять сообщение всем соединениям из connectionMap
- * 8. В классе
+ * 8. В классе Handler:
  * - создал и реализовал String serverHandshake(Connection connection)
  * Метод в качестве параметра принимает соединение connection, а возвращает имя нового клиента.
+ * 9. В классе Handler:
+ * - создал и реализовал notifyUsers(Connection connection, String userName)
+ * Метод будет отправлять клиенту (новому участнику) информации об остальных клиентах (участниках) чата
+ * 10.
  */
 
 
@@ -73,7 +77,6 @@ public class Server {
         }
     }
 
-    // реализовывает протокол общения с клиентом
     private static class Handler extends Thread {
 
         private Socket socket;
@@ -85,26 +88,29 @@ public class Server {
         // метод возвращает имя клиента
         private String serverHandshake(Connection connection) throws IOException, ClassNotFoundException {
 
-            // отправляем команду запрос имени пользователя
             connection.send(new Message(MessageType.NAME_REQUEST, "Введите имя пользователя"));
-            // получаем сообщение от пользователя
             Message answer = connection.receive();
 
-            // делаем три проверки
-            // - если в пришедшем сообщении не USER_NAME
-            // - если в ответ пришло пустое имя
-            // - или наша мапа уже содержит такое значение
             if (answer.getType() != MessageType.USER_NAME || answer.getData().isEmpty()
                     || connectionMap.containsKey(answer.getData()))
                 return serverHandshake(connection);
 
-            // после успешного проведения всех проверок добавляем в connectionMap новую пару
             connectionMap.put(answer.getData(), connection);
-            // отправляем сообщение о том, что имя было принято
             connection.send(new Message(MessageType.NAME_ACCEPTED, "Имя принято"));
 
-            // возвращаем имя клиента с которым было установлено соединение
             return answer.getData();
+        }
+
+        // метод отправляет новому участнику информации об остальных клиентах (участниках) чата
+        private void notifyUsers(Connection connection, String userName) throws IOException {
+            // перебираем список ключей
+            for (String name: connectionMap.keySet()) {
+                // если имя уникально
+                if (!userName.equals(name)) {
+                    // отправляем сообщение с этим именем
+                    connection.send(new Message(MessageType.USER_ADDED, name));
+                }
+            }
         }
     }
 }
