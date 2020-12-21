@@ -65,7 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *  - создал и реализовал sendTextMessage(String text), который создает новое текстовое сообщение, используя переданный текст и отправляет его серверу
  * 14. В классе Client:
  * - реализовал метод run()
- * - вызвал метод main, в этом методе
+ * - вызвал метод main
  *   создал объект типа Client и вызвал метод run
  * 15. В классе SocketThread класса Client:
  * - создал и реализовал processIncomingMessage(String message), который выводит текст message в консоль
@@ -80,7 +80,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * - создал и реализовал clientMainLoop(), который будет реализовывать главный цикл обработки сообщений сервера
  * 17. В классе SocketThread класса Client:
  * - реализовал метод run()
- * 18.
+ * 18. Пишем бота.
+ *     В пакете client создал класс BotClient
+ *     В классе BotClient:
+ *  - переопределил методы getSocketThread(), shouldSendTextFromConsole(), getUserName()
+ *  - вызвал метод main
+ *  создал объект типа BotClient и вызвал метод run
+ *  - создал внутренний класс BotSocketThread унаследованный от SocketThread
+ *  19.
  *
  */
 
