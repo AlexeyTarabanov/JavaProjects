@@ -118,5 +118,52 @@ public class Client {
                 Client.this.notifyAll();
             }
         }
+
+        // будет представлять клиента серверу
+        protected void clientHandshake() throws IOException, ClassNotFoundException {
+            while (true) {
+                // получаем сообщение
+                Message message = connection.receive();
+                // если тип полученного сообщения NAME_REQUEST (сервер запросил имя)
+                if (message.getType() == MessageType.NAME_REQUEST) {
+                    // запрашиваем имя пользователя
+                    String name = getUserName();
+                    // отправляем серверу новое сообщение с введеным именем
+                    connection.send(new Message(MessageType.USER_NAME, name));
+                  // если тип полученного сообщения MessageType.NAME_ACCEPTED (сервер принял имя)
+                } else if (message.getType() == MessageType.NAME_ACCEPTED) {
+                    // сообщаем главному потоку, что сервер принял имя клиента
+                    notifyConnectionStatusChanged(true);
+                    // выходим из метода
+                    return;
+                } else {
+                    throw new IOException("Unexpected MessageType");
+                }
+            }
+        }
+
+        // будет реализовывать главный цикл обработки сообщений сервера
+        protected void clientMainLoop() throws IOException, ClassNotFoundException {
+
+            while (true) {
+                // получаем сообщение
+                Message message = connection.receive();
+                // если это текстовое сообщение (тип MessageType.TEXT)
+                if (message.getType() == MessageType.TEXT) {
+                    // выводим текст message в консоль
+                    processIncomingMessage(message.getData());
+                  // если это сообщение с типом MessageType.USER_ADDED
+                } else if (message.getType() == MessageType.USER_ADDED) {
+                    // выводим в консоль информацию о том, что участник с именем userName присоединился к чату
+                    informAboutAddingNewUser(message.getData());
+                  // если это сообщение с типом MessageType.USER_REMOVED, обработай его с помощью метода informAboutDeletingNewUser().
+                } else if (message.getType() == MessageType.USER_REMOVED) {
+                    // выводим в консоль, что участник с именем userName покинул чат
+                    informAboutDeletingNewUser(message.getData());
+                } else {
+                    throw new IOException("Unexpected MessageType");
+                }
+            }
+        }
     }
 }
