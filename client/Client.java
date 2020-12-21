@@ -65,13 +65,11 @@ public class Client {
     }
 
     public void run() {
-        // создаем и запускаем новый поток в режиме daemon,
-        // это нужно для того, чтобы при выходе из программы поток прервался автоматически
+
         SocketThread socketThread = getSocketThread();
         socketThread.setDaemon(true);
         socketThread.start();
 
-        // ожидаем пока поток не получит нотификацию из другого потока.
         try {
             synchronized (this) {
                 this.wait();
@@ -80,17 +78,13 @@ public class Client {
             ConsoleHelper.writeMessage("Ошибка ожидания");
         }
 
-        // после того, как поток дождался нотификации,
-        // проверяем значение clientConnected, если true
         if (clientConnected) {
             ConsoleHelper.writeMessage("Соединение установлено.\n" + "Для выхода наберите команду 'exit'.");
             while (clientConnected) {
-                // считываем сообщения с консоли пока клиент подключен.
                 String string = ConsoleHelper.readString();
                 if (string.equals("exit"))
                     break;
                 if (shouldSendTextFromConsole()) {
-                    // отправляем считанный тескт
                     sendTextMessage(string);
                 }
             }
@@ -99,5 +93,30 @@ public class Client {
         }
     }
 
-    public class SocketThread extends Thread {}
+    public class SocketThread extends Thread {
+
+        // выводит текст message в консоль
+        protected void processIncomingMessage(String message) {
+            ConsoleHelper.writeMessage(message);
+        }
+
+        // выводит в консоль информацию о том, что участник с именем userName присоединился к чату
+        protected void informAboutAddingNewUser(String userName) {
+            ConsoleHelper.writeMessage("Пользовтель " + userName + " присоединился к чату");
+        }
+
+        // выводит в консоль, что участник с именем userName покинул чат
+        protected void informAboutDeletingNewUser(String userName) {
+            ConsoleHelper.writeMessage("Пользовтель " + userName + " покинул чат");
+        }
+
+        // устанавливает значение полю clientConnected внешнего объекта Client в соответствии с переданным параметром
+        // оповещает (пробуждает ожидающий) основной поток класса Client
+        protected void notifyConnectionStatusChanged(boolean clientConnected) {
+            Client.this.clientConnected = clientConnected;
+            synchronized (Client.this) {
+                Client.this.notifyAll();
+            }
+        }
+    }
 }
