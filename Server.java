@@ -67,7 +67,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - реализовал метод run()
  * - вызвал метод main, в этом методе
  *   создал объект типа Client и вызвал метод run
- * 15. В классе Client:
+ * 15. В классе SocketThread класса Client:
  * - создал и реализовал processIncomingMessage(String message), который выводит текст message в консоль
  * - создал и реализовал informAboutAddingNewUser(String userName), который выводит в консоль информацию о том,
  * что участник с именем userName присоединился к чату
@@ -75,9 +75,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * - создал и реализовал notifyConnectionStatusChanged(boolean clientConnected), который устанавливает значение
  * полю clientConnected внешнего объекта Client
  * в соответствии с переданным параметром, оповещает (пробуждает ожидающий) основной поток класса Client
- * 16. В классе Client:
+ * 16. В классе SocketThread класса Client:
  * - создал и реализовал clientHandshake(), который будет представлять клиента серверу
  * - создал и реализовал clientMainLoop(), который будет реализовывать главный цикл обработки сообщений сервера
+ * 17. В классе SocketThread класса Client:
+ * - реализовал метод run()
+ * 18.
+ *
  */
 
 
