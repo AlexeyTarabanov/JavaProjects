@@ -19,6 +19,11 @@ import java.io.IOException;
 
 public class Client {
 
+    public static void main(String[] args) {
+        Client client = new Client();
+        client.run();
+    }
+
     // protected позволит обращаться к этому полю из класса потомков, но запретит обращение из других классов вне пакета.
     protected Connection connection;
     // volatile позволит гарантировать что каждый поток, использующий поле clientConnected, работает с актуальным, а не кэшированным его значением
@@ -40,9 +45,6 @@ public class Client {
     }
 
     // проверяем отправлен ли текст из консоли
-    // в данной реализации клиента всегда должен возвращать true (мы всегда отправляем текст введенный в консоль).
-    // Этот метод может быть переопределен, если мы будем писать какой-нибудь другой клиент, унаследованный от нашего,
-    // который не должен отправлять введенный в консоль текст.
     protected boolean shouldSendTextFromConsole() {
         return true;
     }
@@ -62,6 +64,40 @@ public class Client {
         }
     }
 
+    public void run() {
+        // создаем и запускаем новый поток в режиме daemon,
+        // это нужно для того, чтобы при выходе из программы поток прервался автоматически
+        SocketThread socketThread = getSocketThread();
+        socketThread.setDaemon(true);
+        socketThread.start();
+
+        // ожидаем пока поток не получит нотификацию из другого потока.
+        try {
+            synchronized (this) {
+                this.wait();
+            }
+        } catch (InterruptedException e) {
+            ConsoleHelper.writeMessage("Ошибка ожидания");
+        }
+
+        // после того, как поток дождался нотификации,
+        // проверяем значение clientConnected, если true
+        if (clientConnected) {
+            ConsoleHelper.writeMessage("Соединение установлено.\n" + "Для выхода наберите команду 'exit'.");
+            while (clientConnected) {
+                // считываем сообщения с консоли пока клиент подключен.
+                String string = ConsoleHelper.readString();
+                if (string.equals("exit"))
+                    break;
+                if (shouldSendTextFromConsole()) {
+                    // отправляем считанный тескт
+                    sendTextMessage(string);
+                }
+            }
+        } else {
+            ConsoleHelper.writeMessage("Произошла ошибка во время работы клиента.");
+        }
+    }
 
     public class SocketThread extends Thread {}
 }
