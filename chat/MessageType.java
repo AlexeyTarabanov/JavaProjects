@@ -1,4 +1,4 @@
-package com.javarush.task.task30.task3008.chat.client;
+package com.javarush.task.task30.task3008.chat;
 
 /**
  * 1) NAME_REQUEST - запрос имени.

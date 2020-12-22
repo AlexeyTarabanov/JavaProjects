@@ -1,6 +1,4 @@
-package com.javarush.task.task30.task3008.chat.client;
-
-import com.javarush.task.task30.task3008.chat.client.Message;
+package com.javarush.task.task30.task3008.chat;
 
 import java.io.Closeable;
 import java.io.IOException;
