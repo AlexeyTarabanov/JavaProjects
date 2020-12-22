@@ -1,4 +1,4 @@
-package com.javarush.task.task30.task3008;
+package com.javarush.task.task30.task3008.chat.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;

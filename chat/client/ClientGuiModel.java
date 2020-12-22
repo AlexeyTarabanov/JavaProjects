@@ -1,4 +1,4 @@
-package com.javarush.task.task30.task3008.client;
+package com.javarush.task.task30.task3008.chat.client;
 
 import java.util.Collections;
 import java.util.HashSet;

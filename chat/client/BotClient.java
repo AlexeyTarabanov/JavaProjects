@@ -1,6 +1,4 @@
-package com.javarush.task.task30.task3008.client;
-
-import com.javarush.task.task30.task3008.ConsoleHelper;
+package com.javarush.task.task30.task3008.chat.client;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

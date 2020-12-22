@@ -1,4 +1,4 @@
-package com.javarush.task.task30.task3008;
+package com.javarush.task.task30.task3008.chat.client;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -113,7 +113,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *  - getServerAddress(), getServerPort(), getUserName()
  *  - вызвал метод main
  *  создал объект типа ClientGuiController и вызвал метод run
- *  22.
+ *  22. Чат готов!
  */
 
 
