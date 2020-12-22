@@ -87,7 +87,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *  - вызвал метод main
  *  создал объект типа BotClient и вызвал метод run
  *  - создал внутренний класс BotSocketThread унаследованный от SocketThread
- *  19. В классе BotSocketThread:
+ * 19. В классе BotSocketThread:
  *  - переопределил методы: clientMainLoop(), processIncomingMessage(String message)
  * 20. Пишем графический клиент.
  *     В пакете client создал класс ClientGuiModel
@@ -96,7 +96,24 @@ import java.util.concurrent.ConcurrentHashMap;
  *  - добавил переменную String newMessage, геттер и сеттер для нее
  *  - создал и реализовал addUser(String newUserName), который добавляет имя участника во множество, хранящее всех участников
  *  - создал и реализовал deleteUser(String userName), который удаляет имя участника из множества
- *  21.
+ *  21. Пишем компонент контроллер (Controller):
+ *     В пакете client создал класс ClientGuiController унаследованный от Client
+ *     В классе ClientGuiController:
+ *  - создал и инициализировал поле ClientGuiModel model, отвечающее за модель и геттер для него
+ *  - создал и инициализировал поле ClientGuiView view, отвечающее за представление.
+ *  - добавил внутренний класс GuiSocketThread унаследованный от SocketThread.
+ *     В классе GuiSocketThread переопределил методы:
+ *  - processIncomingMessage(String message), который устанавливает новое сообщение у модели и вызывает обновление вывода сообщений у представления.
+ *  - informAboutAddingNewUser(String userName), который добавляет нового пользователя в модель и вызывает обновление вывода пользователей у отображения.
+ *  - informAboutDeletingNewUser(String userName), который удаляет пользователя из модели и вызывает обновление вывода пользователей у отображения.
+ *  - notifyConnectionStatusChanged(boolean clientConnected), вызывает аналогичный метод у представления.
+ *     В классе ClientGuiController переопределил методы:
+ *  - getSocketThread(), который создает и возвращает объект типа GuiSocketThread
+ *  - void run(), который получает объект SocketThread и вызывает у него метод run()
+ *  - getServerAddress(), getServerPort(), getUserName()
+ *  - вызвал метод main
+ *  создал объект типа ClientGuiController и вызвал метод run
+ *  22.
  */
 
 
