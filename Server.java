@@ -83,12 +83,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * 18. Пишем бота.
  *     В пакете client создал класс BotClient
  *     В классе BotClient:
- *  - переопределил методы getSocketThread(), shouldSendTextFromConsole(), getUserName()
+ *  - переопределил методы: getSocketThread(), shouldSendTextFromConsole(), getUserName()
  *  - вызвал метод main
  *  создал объект типа BotClient и вызвал метод run
  *  - создал внутренний класс BotSocketThread унаследованный от SocketThread
- *  19.
- *
+ *  19. В классе BotSocketThread:
+ *  - переопределил методы: clientMainLoop(), processIncomingMessage(String message)
+ * 20.
  */
 
 
