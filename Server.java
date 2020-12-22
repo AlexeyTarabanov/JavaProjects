@@ -89,7 +89,14 @@ import java.util.concurrent.ConcurrentHashMap;
  *  - создал внутренний класс BotSocketThread унаследованный от SocketThread
  *  19. В классе BotSocketThread:
  *  - переопределил методы: clientMainLoop(), processIncomingMessage(String message)
- * 20.
+ * 20. Пишем графический клиент.
+ *     В пакете client создал класс ClientGuiModel
+ *     В классе ClientGuiModel:
+ *  - добавил переменную Set<String> allUserNames и геттер для нее. В геттере запретил модифицировать возвращенное множество
+ *  - добавил переменную String newMessage, геттер и сеттер для нее
+ *  - создал и реализовал addUser(String newUserName), который добавляет имя участника во множество, хранящее всех участников
+ *  - создал и реализовал deleteUser(String userName), который удаляет имя участника из множества
+ *  21.
  */
 
 

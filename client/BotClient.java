@@ -44,15 +44,10 @@ public class BotClient extends Client{
         // выводит текст message в консоль
         @Override
         protected void processIncomingMessage(String message) {
-            // выводим в консоль текст полученного сообщения message
             ConsoleHelper.writeMessage(message);
-            // проверяем, что message не пустая строка и что содержит ":"
             if (!message.isEmpty() && message.contains(":")) {
-                // получаем имя отправителя
                 String name = message.split(":")[0];
-                // текст сообщения
                 String textMessage = message.substring(message.indexOf(":") + 2);
-                // отправляем ответ в зависимости от текста принятого сообщения
                 SimpleDateFormat dateFormat;
                 switch (textMessage) {
                     case "дата":
@@ -83,8 +78,6 @@ public class BotClient extends Client{
                         dateFormat = null;
                 }
                 if (dateFormat != null) {
-                    // для получения текущей даты используем класс Calendar и метод getTime()
-                    //sendTextMessage("Информация для " + name + ": " + dateFormat.format(Calendar.getInstance().getTime()));
                     sendTextMessage(String.format("Информация для %s: %s", name, dateFormat.format(Calendar.getInstance().getTime())));
                 }
             }
